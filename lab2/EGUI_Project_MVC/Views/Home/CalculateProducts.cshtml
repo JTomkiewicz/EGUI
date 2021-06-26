@@ -1,0 +1,166 @@
+@model EGUI_Project_MVC.Models.CalculateProductsModel
+
+@{
+    ViewData["Title"] = "Calculate ingredients";
+}
+
+<h2 class="text-center">Calculate ingredients</h2>
+
+<div class="row justify-content-center">
+   <form style="width: 70%;">
+       <div class="form-row">
+           <div class="col-5" style="position: relative; height: 300px; overflow: auto;">
+               <!-- available recipes table -->
+               <label for="availableRecipes">Available recipes</label>
+
+               <table id="availableRecipes" class="table">
+                   <thead class="thead-dark">
+                       <tr>
+                           <th scope="col" style="width: 80%;">
+                               Name
+                           </th>
+
+                           <th scope="col" style="width: 20%;">
+                               &nbsp;
+                           </th>
+                       </tr>
+                   </thead>
+
+                   <tbody>
+                       @foreach (RecipeModel recipe in Model.jsonList.listOfRecipes)
+                       {
+                            <tr>
+                                <td scope="row">
+                                    @recipe.recipeName
+                                </td>
+
+                                <td scope="row">
+                                    <a asp-controller="Home" asp-action="AddToBusket" asp-route-nameToAdd=@recipe.recipeName>
+                                        <button type="button" class="btn btn-secondary">Add</button> 
+                                    </a>
+                                </td>
+                            </tr>
+                       }
+                   </tbody>
+               </table>
+           </div>
+
+           <div class="col">
+               &nbsp;
+           </div>
+
+            <!-- chosen recipes table -->
+           <div class="col-5" style="position: relative; height: 300px; overflow: auto;">
+               <label for="chosenRecipes">Chosen recipes</label>
+
+               <table id="chosenRecipes" class="table">
+                   <thead class="thead-dark">
+                       <tr>
+                           <th scope="col" style="width: 80%;">
+                               Name
+                           </th>
+
+                           <th scope="col" style="width: 20%;">
+                               &nbsp;
+                           </th>
+                       </tr>
+                   </thead>
+
+                   <tbody>
+                       @foreach (RecipeModel recipe in Model.jsonBucketList.listOfRecipes)
+                       {
+                           <tr>      
+                                <td scope="row">
+                                    @recipe.recipeName
+                                </td>
+
+                                <td scope="row">
+                                    <a asp-controller="Home" asp-action="RemoveFromBucket" asp-route-nameToRemove=@recipe.recipeName>
+                                        <button type="button" class="btn btn-secondary">Remove</button> 
+                                    </a>
+                                </td>
+                        </tr>
+                       }
+                       
+                   </tbody>
+               </table>
+           </div>
+       </div>
+
+        <br>
+        <br>
+
+        <!-- textbox with needed ingredients -->
+       <div class="form-group">
+            <label for="neededIngredientsText">Ingredients that you need</label>
+
+            @{
+                List<string> namesOfProducts = new List<string>();
+                List<double> nrOfProducts = new List<double>();
+                List<string> unitsOfProducts = new List<string>();
+
+                foreach (RecipeModel recipe in Model.jsonBucketList.listOfRecipes)
+                {
+                    for(int j = 0; j < recipe.productNames.Count(); j++)
+                    {
+                        if(recipe.productNames[j] != "recipe")
+                        {
+                            string nrAndUnit = recipe.productNrUnit[j].ToString();
+
+                            string[] nrAndUnitSeparated = nrAndUnit.Split(' ');
+
+                            double nrDouble = Convert.ToDouble(nrAndUnitSeparated[0]);
+
+                            string unitString = "";
+
+                            for(int i = 1; i < nrAndUnitSeparated.Count(); i++) 
+                            {
+                                unitString += nrAndUnitSeparated[i];
+                            }
+
+                            bool addNew = true;
+
+                            for(int i = 0; i < namesOfProducts.Count(); i++) {
+                                if(namesOfProducts[i] == recipe.productNames[j] 
+                                && 
+                                unitString == unitsOfProducts[i]) 
+                                {
+                                    nrOfProducts[i] += nrDouble;
+                                    addNew = false;
+                                    break;
+                                }
+                            }
+
+                            if(addNew) 
+                            {
+                                //push data into lists
+                                namesOfProducts.Add(recipe.productNames[j]);
+                                nrOfProducts.Add(nrDouble);
+                                unitsOfProducts.Add(unitString);
+                            }
+                        }
+                    }
+                }
+
+                string stringIngredientsSum = "";
+
+                for(int i = 0; i < namesOfProducts.Count(); i++) {
+                    //add name
+                    stringIngredientsSum += namesOfProducts[i];
+
+                    //add space
+                    stringIngredientsSum += " ";
+
+                    //add nr and unit
+                    string nrString = nrOfProducts[i].ToString();
+                    stringIngredientsSum += nrString + " " + unitsOfProducts[i];
+
+                    //add endline
+                    stringIngredientsSum += "\n";
+                }
+            }
+            <textarea class="form-control" id="neededIngredientsText" rows="9" readonly>@stringIngredientsSum</textarea>
+        
+        </div>
+   </form> 
+</div>

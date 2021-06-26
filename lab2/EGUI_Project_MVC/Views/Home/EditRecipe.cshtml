@@ -1,0 +1,146 @@
+@model EGUI_Project_MVC.Models.AddRecipeModel
+
+@{
+    ViewData["Title"] = "Edit recipe";
+}
+
+<h2 class="text-center">Editing recipe</h2>
+
+<!-- recipe name & description -->
+<div class="row justify-content-center">
+    <form style="width: 70%;" asp-action="AddNameToNew" asp-controller="Home">
+
+        <div class="form-group">
+            <label for="recipeName">Name</label>
+
+            <div>
+                <input asp-for="addRecipeName" class="form-control" value=@Model.recipeToAdd.recipeName style="width: 80%; float: left;">
+
+                <button type="submit" class="btn btn-secondary" style="float:left; width: 17%; margin-left: 3%;">Save name</button>
+            </div>         
+        </div>
+
+    </form>
+
+    <form style="width: 70%;" asp-action="AddDescriptionToNew" asp-controller="Home">
+
+        <div class="form-group" style="margin-top: 20px;">
+            <label for="recipeText">Description</label>
+
+            @{
+                string descriptionText = "";
+
+                for(int i = 0; i < Model.recipeToAdd.recipeDesc.Count(); i++)
+                {
+                    descriptionText += Model.recipeToAdd.recipeDesc[i];
+
+                    descriptionText += "\n";
+                }
+            }
+
+            <div>
+                @Html.TextAreaFor(Model => Model.addRecipeDesc, new { @class = "form-control", id = "addRecipeDesc", value=descriptionText, @rows = "6", style="width: 80%; float: left;"})
+
+                <button type="submit" class="btn btn-secondary" style="float: left; width: 17%; margin-left: 3%; margin-top: 6%;">Save description</button>
+            </div>
+
+        </div>
+
+    </form>
+
+    <!-- ingredients table -->
+    <div style="width: 70%;">
+        <label for="productTable" style="margin-top: 20px;">Ingredients</label>
+
+        <table class="table" style="width: 100%; margin-bottom: 5%;" id="productTable">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="width: 30%;">
+                    Name
+                </th>
+
+                <th scope="col" style="width: 30%;">
+                    Number
+                </th>
+
+                <th scope="col" style="width: 30%;">
+                    Unit
+                </th>
+
+                <th scope="col" style="width: 10%;">
+                    &nbsp;
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(int i = 0; i < Model.recipeToAdd.productNames.Count(); i++)
+            {
+                <tr>
+                    <td scope="row">
+                    @Model.recipeToAdd.productNames.ElementAt(i)
+                    </td>
+
+                    @{
+                        string nrAndUnit = Model.recipeToAdd.productNrUnit.ElementAt(i);
+                        string[] nrAndUnitSeparated = nrAndUnit.Split(' ');
+                    }
+                        
+                    <td scope="row">
+                        @nrAndUnitSeparated[0]
+                    </td>
+
+                    @{
+                        string unitString = "";
+
+                        for(int j = 1; j < nrAndUnitSeparated.Count(); j++) 
+                        {
+                            unitString += nrAndUnitSeparated[j];
+                            unitString += " ";
+                        }
+                    }
+
+                    <td scope="row">
+                        @unitString
+                    </td>
+
+                    <td scope="row">
+                        <a asp-controller="Home" asp-action="RemoveProductFromNewRecipe" asp-route-indexToRemove=@i>
+                            <p class="btn btn-danger">Delete</p> 
+                        </a>
+                        
+                    </td>
+                </tr>  
+            }
+        </tbody>
+        </table>
+    </div>
+    
+    <!-- add ingredients form -->
+    <form style="width: 70%;" asp-action="AddProductToNew" asp-controller="Home">
+        <div class="form-row">
+            <div class="col">
+                <input type="text" asp-for="addProductName" class="form-control" placeholder="Product name">
+            </div>
+
+            <div class="col">
+                <input type="text" asp-for="addProductNr" class="form-control" placeholder="Decimal number">
+            </div>
+
+            <div class="col">
+                <input type="text" asp-for="addProductUnit" class="form-control" placeholder="Unit">
+            </div>
+
+            <div class="col" style="text-align: center;">
+                <button type="submit" class="btn btn-secondary">Add ingredient</button>
+            </div>
+        </div>
+    </form>     
+
+    <!-- add new recipe btn -->
+    <div style="width: 70%; margin-top: 5%;">
+        <a asp-controller="Home" asp-action="SaveEditedRecipe">
+            <p class="btn btn-primary">Save edited recipe</p> 
+        </a>
+    </div>
+    
+</div>       
